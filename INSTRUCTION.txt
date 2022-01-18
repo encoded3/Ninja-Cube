@@ -1,0 +1,12 @@
+===Ninja Cube===
+Welcome to the game Ninja Cube. 
+An arcade game where you play 
+as a cube. Run as many meters 
+as you can without hitting 
+obstacles.
+
+===Control===
+up - up arrow
+
+down - down arrow
+
