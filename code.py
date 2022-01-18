@@ -43,6 +43,7 @@ def draw():
         music.unpause()
 
     if mode == "game over":
+        screen.clear()
         game_over_window.draw()
         restart.draw()
         screen.draw.text(f"{meters}", pos=(10, 0), color='white', fontsize=30, fontname="monsterrat")
