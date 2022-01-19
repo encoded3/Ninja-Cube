@@ -1,5 +1,6 @@
 from pgzrun import go
 import random
+
 WIDTH = 480
 HEIGHT = 360
 TITLE = "Ninja Cube"
@@ -23,7 +24,9 @@ music.play('the sound of footsteps')
 for i in range(12):
     map.append(Actor("scroll", (80 * i, 180)))
 
+
 def draw():
+    global TITLE
     global mode
     for i in range(len(map)):
         map[i].draw()
@@ -35,15 +38,17 @@ def draw():
     pause.draw()
 
     if mode == "pause":
+        TITLE = "Ninja Cube - Pause"
         music.pause()
         screen.clear()
         pause_window.draw()
         run.draw()
     else:
-        music.unpause()
+        if mode != "game over":
+            TITLE = "Ninja Cube"
+            music.unpause()
 
     if mode == "game over":
-        screen.clear()
         game_over_window.draw()
         restart.draw()
         screen.draw.text(f"{meters}", pos=(10, 0), color='white', fontsize=30, fontname="monsterrat")
@@ -53,9 +58,15 @@ def update(dt):
     global meters, repeat_playback, rain, mode
     if mode == "game":
         for i in range(len(map)):
-            map[i].x -= 5
+            if keyboard.space:
+                map[i].x -= 9
+            else:
+                map[i].x -= 5
         for i in range(len(barriers)):
-            barriers[i].x -= 5
+            if keyboard.space:
+                barriers[i].x -= 9
+            else:
+                barriers[i].x -= 5
         for i in range(len(barriers)):
             if cube.colliderect(barriers[i]):
                 music.stop()
@@ -64,11 +75,20 @@ def update(dt):
         for i in range(len(map)):
             if map[i].x < -40:
                 map.pop(i)
-                map.append(Actor("scroll", (520, 180)))
-                if random.randint(1,6) == 1:
-                    barriers.append(Actor("block", (520, random.randint(110, 240))))
+                if meters < 300 or meters > 500:
+                    map.append(Actor("scroll", (520, 180)))
+                    if random.randint(1, 10) == 1:
+                        barriers.append(Actor("block", (520, random.randint(110, 240))))
+                else:
+                    map.append(Actor("scroll2", (520, 180)))
+                    if random.randint(1, 6) == 1:
+                        barriers.append(Actor("block2", (520, random.randint(110, 240))))
+
                 meters += 1
                 repeat_playback += 1
+        for i in range(len(barriers) - 1):
+            if barriers[i].x < -20:
+                barriers.pop(i)
         if meters > 100 and meters < 201:
             rain = Actor("rain", (random.randint(0, 480), random.randint(0, 360)))
         else:
@@ -83,30 +103,46 @@ def update(dt):
                     music.play('rain')
                 else:
                     music.stop()
+                    music.play('the sound of footsteps')
             repeat_playback = 0
         if cube.y > 85 and keyboard.up:
-            cube.y -= 5
+            if keyboard.space:
+                cube.y -= 9
+            else:
+                cube.y -= 5
         if cube.y < 225 and keyboard.down:
-            cube.y += 5
+            if keyboard.space:
+                cube.y += 9
+            else:
+                cube.y += 5
+
 
 def on_mouse_down(pos):
     global mode, barriers, meters, repeat_playback
-    if pause.collidepoint(pos):
-        mode = "pause"
-    if run.collidepoint(pos):
-        mode = "game"
-    if restart.collidepoint(pos):
-        mode = "game"
-        generate_map()
-        barriers = []
-        music.play('the sound of footsteps')
-        meters = 0
-        repeat_playback = 0
+    if mode == "game":
+        if pause.collidepoint(pos):
+            mode = "pause"
+    if mode == "pause":
+        if run.collidepoint(pos):
+            mode = "game"
+    if mode == "game over":
+        if restart.collidepoint(pos):
+            mode = "game"
+            generate_map()
+            barriers = []
+            music.play('the sound of footsteps')
+            meters = 0
+            repeat_playback = 0
+
 
 def generate_map():
     map = []
-    for i in range(12):
+    for i in range(24):
         map.append(Actor("scroll", (80 * i, 180)))
+    for i in range(len(map)):
+        for i in range(len(map)):
+            if i + 1 < len(map) and map[i].colliderect(map[i + 1]):
+                map[i + 1].x + 1
 
 
 go()
